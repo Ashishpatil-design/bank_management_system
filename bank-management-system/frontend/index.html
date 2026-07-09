@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger & Vault — Bank Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-seal">L&amp;V</div>
+      <div class="brand-text">
+        <span class="brand-name">Ledger &amp; Vault</span>
+        <span class="brand-sub">Bank Management System</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-index">01</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="customers">
+        <span class="nav-index">02</span> Customers
+      </button>
+      <button class="nav-item" data-view="accounts">
+        <span class="nav-index">03</span> Accounts
+      </button>
+      <button class="nav-item" data-view="transactions">
+        <span class="nav-index">04</span> Transactions
+      </button>
+      <button class="nav-item" data-view="history">
+        <span class="nav-index">05</span> Statement
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="api-status" id="apiStatus">
+        <span class="dot"></span> Checking API…
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div id="toast" class="toast"></div>
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <header class="view-header">
+        <h1>Ledger Overview</h1>
+        <p class="view-sub">A running summary of the institution's book, updated live from the vault.</p>
+      </header>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Customers</span>
+          <span class="stat-value" id="statCustomers">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Open Accounts</span>
+          <span class="stat-value" id="statAccounts">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Assets Under Ledger</span>
+          <span class="stat-value" id="statBalance">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Recorded Transactions</span>
+          <span class="stat-value" id="statTransactions">—</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Recent Entries</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="recentTransactionsTable">
+            <thead>
+              <tr><th>Date</th><th>Account</th><th>Type</th><th>Amount</th><th>Balance After</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section class="view" id="view-customers">
+      <header class="view-header">
+        <h1>Customers</h1>
+        <p class="view-sub">Every account holder registered to this ledger.</p>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Register New Customer</h2>
+        </div>
+        <form id="customerForm" class="form-grid">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="custFullName" required placeholder="Eleanor Whitfield" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="custEmail" required placeholder="eleanor@example.com" />
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="text" id="custPhone" placeholder="+91 98765 43210" />
+          </div>
+          <div class="field">
+            <label>Address</label>
+            <input type="text" id="custAddress" placeholder="221B Baker Street" />
+          </div>
+          <button type="submit" class="btn btn-primary">Add Customer</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Customer Register</h2>
+          <button class="btn btn-ghost" id="refreshCustomers">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="customersTable">
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCOUNTS -->
+    <section class="view" id="view-accounts">
+      <header class="view-header">
+        <h1>Accounts</h1>
+        <p class="view-sub">Open new accounts and review balances at a glance.</p>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Open New Account</h2>
+        </div>
+        <form id="accountForm" class="form-grid">
+          <div class="field">
+            <label>Customer</label>
+            <select id="acctCustomerId" required></select>
+          </div>
+          <div class="field">
+            <label>Account Type</label>
+            <select id="acctType" required>
+              <option value="SAVINGS">Savings</option>
+              <option value="CURRENT">Current</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Initial Deposit</label>
+            <input type="number" id="acctInitialDeposit" min="0" step="0.01" value="0" />
+          </div>
+          <button type="submit" class="btn btn-primary">Open Account</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>All Accounts</h2>
+          <button class="btn btn-ghost" id="refreshAccounts">Refresh</button>
+        </div>
+        <div class="account-grid" id="accountsGrid"></div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="view" id="view-transactions">
+      <header class="view-header">
+        <h1>Transactions</h1>
+        <p class="view-sub">Deposit, withdraw, or transfer funds between ledger accounts.</p>
+      </header>
+
+      <div class="tx-grid">
+        <div class="panel">
+          <div class="panel-head"><h2>Deposit</h2></div>
+          <form id="depositForm" class="form-grid">
+            <div class="field">
+              <label>Account Number</label>
+              <input type="text" id="depAccountNumber" required placeholder="AC0000000001" />
+            </div>
+            <div class="field">
+              <label>Amount</label>
+              <input type="number" id="depAmount" min="0.01" step="0.01" required />
+            </div>
+            <div class="field">
+              <label>Note</label>
+              <input type="text" id="depNote" placeholder="Optional" />
+            </div>
+            <button type="submit" class="btn btn-success">Deposit Funds</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Withdraw</h2></div>
+          <form id="withdrawForm" class="form-grid">
+            <div class="field">
+              <label>Account Number</label>
+              <input type="text" id="wdAccountNumber" required placeholder="AC0000000001" />
+            </div>
+            <div class="field">
+              <label>Amount</label>
+              <input type="number" id="wdAmount" min="0.01" step="0.01" required />
+            </div>
+            <div class="field">
+              <label>Note</label>
+              <input type="text" id="wdNote" placeholder="Optional" />
+            </div>
+            <button type="submit" class="btn btn-danger">Withdraw Funds</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Transfer</h2></div>
+          <form id="transferForm" class="form-grid">
+            <div class="field">
+              <label>From Account</label>
+              <input type="text" id="trFrom" required placeholder="AC0000000001" />
+            </div>
+            <div class="field">
+              <label>To Account</label>
+              <input type="text" id="trTo" required placeholder="AC0000000002" />
+            </div>
+            <div class="field">
+              <label>Amount</label>
+              <input type="number" id="trAmount" min="0.01" step="0.01" required />
+            </div>
+            <div class="field">
+              <label>Note</label>
+              <input type="text" id="trNote" placeholder="Optional" />
+            </div>
+            <button type="submit" class="btn btn-primary">Transfer Funds</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATEMENT / HISTORY -->
+    <section class="view" id="view-history">
+      <header class="view-header">
+        <h1>Statement</h1>
+        <p class="view-sub">Look up the full transaction history for a single account.</p>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Lookup</h2>
+        </div>
+        <form id="historyForm" class="form-grid">
+          <div class="field">
+            <label>Account</label>
+            <select id="histAccountId" required></select>
+          </div>
+          <button type="submit" class="btn btn-primary">View Statement</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Entries</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="historyTable">
+            <thead>
+              <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance After</th><th>Description</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
